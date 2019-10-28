@@ -2,9 +2,7 @@
 using LiteDB;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Configuration;
 
 namespace Carmax.API.Data
 {
@@ -13,7 +11,7 @@ namespace Carmax.API.Data
         private static string connectionString { get; set; }
         public DbContext()
         {
-            connectionString = @"D:\MyContactsData.db";
+            connectionString = ConfigurationManager.AppSettings["DbPath"];
         }
 
         public IEnumerable<Contact> GetContacts()
@@ -27,12 +25,21 @@ namespace Carmax.API.Data
 
         public bool AddContact(Contact contact)
         {
-            using (var db = new LiteDatabase(connectionString))
+            try
             {
-                var collection = db.GetCollection<Contact>("Contacts");
-                var res = collection.Insert(contact);
-                return true;
+                using (var db = new LiteDatabase(connectionString))
+                {
+                    var collection = db.GetCollection<Contact>("Contacts");
+                    collection.Insert(contact);
+                    return true;
+                }
             }
+            catch(Exception ex)
+            {
+                //Exception Logging
+                return false;
+            }
+            
         }
 
         public Contact GetContactById(int id)
@@ -46,19 +53,35 @@ namespace Carmax.API.Data
 
         public bool UpdateContact(Contact contact)
         {
-            using (var db = new LiteDatabase(connectionString))
+            try
             {
-                var collection = db.GetCollection<Contact>("Contacts");
-                return collection.Update(contact);
+                using (var db = new LiteDatabase(connectionString))
+                {
+                    var collection = db.GetCollection<Contact>("Contacts");
+                    return collection.Update(contact);
+                }
+            }
+            catch (Exception ex)
+            {
+                //Exception Logging
+                return false;
             }
         }
 
         public bool DeleteContact(int id)
         {
-            using (var db = new LiteDatabase(connectionString))
+            try
             {
-                var collection = db.GetCollection<Contact>("Contacts");
-                return collection.Delete(id);
+                using (var db = new LiteDatabase(connectionString))
+                {
+                    var collection = db.GetCollection<Contact>("Contacts");
+                    return collection.Delete(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                //Exception Logging
+                return false;
             }
         }
     }

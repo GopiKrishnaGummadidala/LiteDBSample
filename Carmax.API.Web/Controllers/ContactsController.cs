@@ -1,11 +1,5 @@
 ﻿using Carmax.API.Data;
 using Carmax.API.Models;
-using LiteDB;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 
 namespace Carmax.API.Web.Controllers

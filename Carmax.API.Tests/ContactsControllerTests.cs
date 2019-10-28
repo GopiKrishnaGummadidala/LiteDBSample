@@ -7,6 +7,7 @@ using Carmax.API.Models;
 using Carmax.API.Web.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Web.Http;
 
 namespace Carmax.API.Tests
 {
@@ -35,10 +36,10 @@ namespace Carmax.API.Tests
                         .Returns(getContactByIdMockData);
 
             var controller = new ContactsController(dbContextMock.Object);
-            var result = controller.Get(1) as OkNegotiatedContentResult<Contact>;
+            var result = controller.Get(2) as OkNegotiatedContentResult<Contact>;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Content.Id);
+            Assert.AreEqual(2, result.Content.Id);
         }
 
         [TestMethod]
@@ -46,13 +47,96 @@ namespace Carmax.API.Tests
         {
             var dbContextMock = new Mock<IDbContext>();
             dbContextMock.Setup(db => db.GetContactById(It.IsAny<int>()))
-                        .Returns(getContactByIdMockData);
+                        .Returns((Contact)null);
 
             var controller = new ContactsController(dbContextMock.Object);
             var result = controller.Get(2) as OkNegotiatedContentResult<Contact>;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Content.Id);
+            Assert.IsNull(result.Content);
+        }
+
+        [TestMethod]
+        public void PostContact_ShouldAddContact()
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock.Setup(db => db.AddContact(getContactByIdMockData()))
+                        .Returns(true);
+
+            var controller = new ContactsController(dbContextMock.Object);
+            var result = controller.Post(getContactByIdMockData()) as OkNegotiatedContentResult<bool>;
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Content);
+        }
+        [TestMethod]
+        public void PostContact_ShouldNotAddContact()
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock.Setup(db => db.AddContact(getContactByIdMockData()))
+                        .Returns(false);
+
+            var controller = new ContactsController(dbContextMock.Object);
+            var result = controller.Post(getContactByIdMockData()) as OkNegotiatedContentResult<bool>;
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Content);
+        }
+
+        [TestMethod]
+        public void PutContact_ShouldUpdateContact()
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock.Setup(db => db.UpdateContact(getContactByIdMockData()))
+                        .Returns(true);
+
+            var controller = new ContactsController(dbContextMock.Object);
+            var result = controller.Put(1, getContactByIdMockData()) as OkNegotiatedContentResult<bool>;
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Content);
+        }
+        [TestMethod]
+        public void PutContact_ShouldNotUpdateContact()
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock.Setup(db => db.UpdateContact(getContactByIdMockData()))
+                        .Returns(false);
+
+            var controller = new ContactsController(dbContextMock.Object);
+            var result = controller.Put(1, getContactByIdMockData()) as OkNegotiatedContentResult<bool>;
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Content);
+        }
+
+
+        [TestMethod]
+        public void DeleteContact_ShouldDeleteContact()
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock.Setup(db => db.DeleteContact(It.IsAny<int>()))
+                        .Returns(true);
+
+            var controller = new ContactsController(dbContextMock.Object);
+            var result = controller.Delete(1) as OkNegotiatedContentResult<bool>;
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Content);
+        }
+
+        [TestMethod]
+        public void DeleteContact_ShouldNotDeleteContact()
+        {
+            var dbContextMock = new Mock<IDbContext>();
+            dbContextMock.Setup(db => db.DeleteContact(It.IsAny<int>()))
+                        .Returns(false);
+
+            var controller = new ContactsController(dbContextMock.Object);
+            var result = controller.Delete(0) as OkNegotiatedContentResult<bool>;
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Content);
         }
 
 
@@ -97,7 +181,7 @@ namespace Carmax.API.Tests
         {
             Contact mockData = new Contact
             {
-                Id = 1,
+                Id = 2,
                 Name = new Name
                 {
                     First = "Test F",
